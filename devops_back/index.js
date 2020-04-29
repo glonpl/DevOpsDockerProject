@@ -73,10 +73,9 @@ app.get("/history/", (req, resp) => {
   });
 });
 app.get('/dbinit', function (req, res) {
-  pgClient.query('CREATE TABLE IF NOT EXISTS history(profit VARCHAR);').catch(err => console.log(err));
   res.send({keys})
   
-});
+});//for debug purposes
 
 app.get('/', function (req, res) {
   res.send('Hello World!');
