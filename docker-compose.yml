@@ -13,17 +13,24 @@ services:
         restart: always
         build: 
             dockerfile: Dockerfile.dev
-            context: ./devops_nginx
+            context: ./nginx
         ports: 
-            - '8080:80'
+            - '80:80'
+        depends_on:
+            - backend
+            - frontend 
 
     backend:
         build: 
             dockerfile: Dockerfile.dev
-            context: ./devops_back
+            context: ./backend
         volumes:
             - /opt/app/node_modules
-            - ./devops_back:/opt/app
+            - ./backend:/opt/app
+        depends_on: 
+            - my-postgres-server
+            - my-redis-server
+
         environment: 
             - REDIS_HOST=${REDIS_HOST}
             - REDIS_PORT=${REDIS_PORT}
@@ -32,5 +39,17 @@ services:
             - PGDATABASE=${PGDATABASE}
             - PGPASSWORD=${PGPASSWORD}
             - PGPORT=${PGPORT}
+        
+
+    frontend:
+        build: 
+            dockerfile: Dockerfile.dev
+            context: ./frontend
+        volumes:
+            - /opt/app/node_modules
+            - ./frontend:/opt/app
+        depends_on: 
+            - backend
+        tty: true
 
 

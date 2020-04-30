@@ -24,7 +24,6 @@ pgClient.on('error', () => console.log('No connection to PG DB'));
 
 pgClient.query('CREATE TABLE IF NOT EXISTS history(profit VARCHAR)').catch(err =>{ 
   console.log(err);
-  res.send({keys})   
 });
 
 const countPizzaProfit = function(radius, price){
@@ -35,19 +34,21 @@ app.get("/:radius/:price", (req, resp) => {
   const key = `${req.params.radius}&${req.params.price}`;
   const radius = req.params.radius;
   const price = req.params.price;
-  // var profitability = countPizzaProfit(radius, price);
-  // return resp.send({profitability});
+
   if (isNaN(radius)) {
-    return resp.send({error: "Promień musi być liczbą!"});
+    return resp.send({error: "Radius must be a number!"});
   }  
   if (isNaN(price)) {
-    return resp.send({error: "Cena musi być liczbą!"});
+    return resp.send({error: "Price must be a number!"});
   }
-  if(radius<=0){
-    return resp.send({error: "Rozmiar pizzy nie może być mniejszy od zera"});
+  if(radius<0){
+    return resp.send({error: "Pizza size can't be negative!"});
+  }
+  if(radius==0){
+    return resp.send({error: "There is no pizza! (╯°□°）╯︵ ┻━┻"});
   }
   if(price<0){
-    return resp.send({error: "Cena pizzy nie może być ujemna"});
+    return resp.send({error: "Pizza price can't be negative!"});
   }
   redisClient.get(key, (err, profitability) => {
       if(!profitability) {
@@ -55,6 +56,7 @@ app.get("/:radius/:price", (req, resp) => {
         redisClient.set(key, profitability);
       }
       pgClient.query('INSERT INTO history(profit) VALUES ($1);', [profitability]).catch(err => console.log(err));
+      profitability= Number(profitability).toFixed(3);
       resp.send({result: profitability})
   });
 
@@ -63,7 +65,7 @@ app.get("/:radius/:price", (req, resp) => {
 
 
 app.get("/history/", (req, resp) => {
-  pgClient.query("SELECT * FROM history;", (err,res) => {
+  pgClient.query("SELECT * FROM history", (err,res) => {
       if (err) {
           console.log(err.stack, res);
           resp.send('Error occured when reading from db\n'+err.stack);
@@ -72,15 +74,15 @@ app.get("/history/", (req, resp) => {
       }
   });
 });
-app.get('/dbinit', function (req, res) {
-  res.send({keys})
+// app.get('/dbinit', function (req, res) {
+//   res.send({keys})
   
-});//for debug purposes
+// });//for debug purposes
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
-});
+// app.get('/', function (req, res) {
+//   res.send('Hello World!');
+// });
 
-app.listen(3000,  err => {
-  console.log('Example app listening on port 3000!');
+app.listen(4000,  err => {
+  console.log('Example app listening on port 4000!');
 });
