@@ -1,8 +1,8 @@
 # DevOpsDockerProject  
-This is my dockerized NodeJS app, using PostgreSQL REDIS and NGINX  
+This is my dockerized NodeJS/REACT app, using PostgreSQL, REDIS, and NGINX  
 ## To run this app simply run command:  
 ```
-docker-compose up
+docker-compose up --build
 ```
 ### To work properly add .env file with values:  
 ```
